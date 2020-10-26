@@ -4,16 +4,18 @@ namespace ConsoleApp
 {
     public class Rover : IRover
     {
+        public Position Position;
+
         private Plateau _plateau;
-        private Position _position;
 
-        public Rover(string position, Plateau plateau)
+        public Rover(Plateau plateau)
         {
-            string[] vs = position.Split(" ");
-
-            _position = new Position(int.Parse(vs[0]), int.Parse(vs[1]), Enum.Parse<Direction>(vs[2]));
-
             _plateau = plateau;
+        }
+
+        public Rover(Plateau plateau, string position) : this(plateau)
+        {
+            this.Deploy(position, plateau.XMax, plateau.YMax, plateau.XMin, plateau.YMin);
         }
 
         public void ExecuteInstructions(string instructions)
@@ -37,40 +39,40 @@ namespace ConsoleApp
 
         public void MoveForward()
         {
-            switch (_position.Direction)
+            switch (Position.Direction)
             {
                 case Direction.N:
 
-                    if (_position.Y + 1 <= _plateau.Ymax)
+                    if (Position.Y + 1 <= _plateau.YMax)
                     {
-                        _position.Y = _position.Y + 1;
+                        Position.Y += 1;
                     }
 
                     break;
 
                 case Direction.S:
 
-                    if (_position.Y - 1 >= _plateau.Ymin)
+                    if (Position.Y - 1 >= _plateau.YMin)
                     {
-                        _position.Y = _position.Y - 1;
+                        Position.Y -= 1;
                     }
 
                     break;
 
                 case Direction.E:
 
-                    if (_position.X + 1 <= _plateau.Xmax)
+                    if (Position.X + 1 <= _plateau.XMax)
                     {
-                        _position.X = _position.X + 1;
+                        Position.X += 1;
                     }
 
                     break;
 
                 case Direction.W:
 
-                    if (_position.X - 1 >= _plateau.Xmin)
+                    if (Position.X - 1 >= _plateau.XMin)
                     {
-                        _position.X = _position.X - 1;
+                        Position.X -= 1;
                     }
 
                     break;
@@ -79,51 +81,84 @@ namespace ConsoleApp
 
         public void SpinLeft()
         {
-            switch (_position.Direction)
+            switch (Position.Direction)
             {
                 case Direction.N:
-                    _position.Direction = Direction.W;
+                    Position.Direction = Direction.W;
                     break;
 
                 case Direction.S:
-                    _position.Direction = Direction.E;
+                    Position.Direction = Direction.E;
                     break;
 
                 case Direction.E:
-                    _position.Direction = Direction.N;
+                    Position.Direction = Direction.N;
                     break;
 
                 case Direction.W:
-                    _position.Direction = Direction.S;
+                    Position.Direction = Direction.S;
                     break;
             }
         }
 
         public void SpinRight()
         {
-            switch (_position.Direction)
+            switch (Position.Direction)
             {
                 case Direction.N:
-                    _position.Direction = Direction.E;
+                    Position.Direction = Direction.E;
                     break;
 
                 case Direction.S:
-                    _position.Direction = Direction.W;
+                    Position.Direction = Direction.W;
                     break;
 
                 case Direction.E:
-                    _position.Direction = Direction.S;
+                    Position.Direction = Direction.S;
                     break;
 
                 case Direction.W:
-                    _position.Direction = Direction.N;
+                    Position.Direction = Direction.N;
                     break;
             }
         }
 
-        public string Position()
+        public void Deploy(string position, int xMax, int yMax, int xMin, int yMin)
         {
-            return _position.ToString();
+            string[] xyz = position.Split(" ");
+
+            int x = int.Parse(xyz[0]);
+
+            if (x > xMax)
+            {
+                throw new PositionException("Rover X coordinate higher from plateau xMax coordinate");
+            }
+
+            if (x < xMin)
+            {
+                throw new PositionException("Rover X coordinate lower from plateau xMin coordinate");
+            }
+
+            int y = int.Parse(xyz[1]);
+
+            if (y > yMax)
+            {
+                throw new PositionException("Rover Y coordinate higher from plateau yMax coordinate");
+            }
+
+            if (y < yMin)
+            {
+                throw new PositionException("Rover Y coordinate lower from plateau yMin coordinate");
+            }
+
+            Direction direction = Enum.Parse<Direction>(xyz[2]);
+
+            Position = new Position(x, y, direction);
+        }
+
+        public string PositionResult()
+        {
+            return Position.ToString();
         }
     }
 }
